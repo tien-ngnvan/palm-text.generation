@@ -5,7 +5,7 @@ cd cerebro-GenPALM
 ## Installation 
 - [pytorch](https://pytorch.org/)
 
-## Download exmaple dataset (CNN-DM Data)
+## Download example dataset (CNN-DM Data)
 - [CNN Stories](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfTHk4NFg2SndKcjQ)
 - [DailyMail Stories](https://drive.google.com/uc?export=download&id=0BwmD_VLjROrfM1BxdkxVaTY2bWs)
 - After downloading these two dataset, unzip them, and there will be two folder ```cnn``` and ```dailymail``` 
