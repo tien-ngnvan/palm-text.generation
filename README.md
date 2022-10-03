@@ -36,7 +36,18 @@ sh scripts/bpe_preprocess.sh
 sh scripts/palm-preprocess.sh
 ```
 
-### Train model 
+### Train model without pretraining
 ```bash
 sh scripts/palm-train.sh
+```
+
+## Pretrain PALM
+```bash
+cd cerebro-GenPALM
+wget https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
+mkdir corpus
+mkdir corpus/wiki
+mkdir corpus/wikitext
+mv enwiki-latest-pages-articles.xml.bz2 corpus
+python3 -m utils.process_wiki
 ```

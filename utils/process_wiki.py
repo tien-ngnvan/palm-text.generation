@@ -4,26 +4,25 @@ from tqdm import tqdm
 from gensim.corpora import WikiCorpus
 
 if __name__ == '__main__':
-    
+     
     if True:
-        inp="/content/enwiki-latest-pages-articles.xml.bz2"
+        inp="./corpus/enwiki-latest-pages-articles.xml.bz2"
         i = 0
-        output_file="/content/out/wiki_englist_%07d.txt"%i
+        output_file="./corpus/wiki_englist_%07d.txt"%i
         output = open(output_file, 'w',encoding="utf-8")
-        wiki = WikiCorpus(inp, lemmatize=False, dictionary={})
+        wiki = WikiCorpus(inp, lemmatize=None, dictionary={})
         for text in wiki.get_texts():
             output.write(" ".join(text) + "\n")
             i = i + 1
             if (i % 10000 == 0):
                 output.close()
 
-                output_file = "/content/out/wiki_englist_%07d.txt" % i
+                output_file = "./corpus/wiki_englist_%07d.txt" % i
                 output = open(output_file, 'w', encoding="utf-8")
                 print("Save "+str(i) + " articles")
         output.close()
     
-
-    output_dir = '/content/output/'
+    output_dir = './corpus/wiki/'
     wiki_train_raw = "wiki.train.raw"
     wiki_val_raw = "wiki.valid.raw"
     wiki_test_raw = "wiki.test.raw"
@@ -32,7 +31,7 @@ if __name__ == '__main__':
         with open(os.path.join(output_dir, wiki_val_raw), 'w') as fout_wiki_val:
              with open(os.path.join(output_dir, wiki_test_raw), 'w') as fout_wiki_test:
         
-                fileList = os.listdir('/content/wikitext-103-raw')
+                fileList = os.listdir('./corpus/')
                 for file in tqdm(fileList):
                     res = file.split('.')
                     if len(res) == 2:
@@ -41,7 +40,7 @@ if __name__ == '__main__':
                         continue
                     if ext == 'txt' and name.startswith('wiki'):
                         print(file)
-                        with open(os.path.join('/content/output/', file)) as fin:
+                        with open(os.path.join('./corpus/', file)) as fin:
                             lines = fin.readlines()
                             # print(len(lines))
                             for line in lines:

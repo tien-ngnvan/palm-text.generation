@@ -17,7 +17,7 @@ wiki_val_raw = "wiki.valid.raw"
 wiki_test_raw = "wiki.test.raw"
 
 # finished_files_dir = "/datadrive/wikitext"
-finished_files_dir = "/corpus/wikitext"
+finished_files_dir = "./corpus/wikitext"
 
 def styles(input):
     str = input.strip()
