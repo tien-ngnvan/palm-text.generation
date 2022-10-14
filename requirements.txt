@@ -1,1 +1,5 @@
 gensim
+fairseq==0.11.1
+tensorboardX
+wandb
+sacrebleu==1.5.1
