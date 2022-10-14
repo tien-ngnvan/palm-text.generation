@@ -51,3 +51,23 @@ mkdir corpus/wikitext
 mv enwiki-latest-pages-articles.xml.bz2 corpus
 python3 -m utils.process_wiki
 ```
+## Inference 
+*Note that: ```interactive``` will take inputs for infinite time. In order to stop doing inference, press ```Ctrl+D```*
+- Generate with Beam search 
+```bash 
+python -m utils.interactive_v2 ./corpus/wikitext_bin_c \ 
+                                --task auto_encoding_regressive \
+                                --user-dir ./src \
+                                --source-lang source --target-lang target --bpe gpt2 \
+                                --beam 4 --nbest 1 \
+                                --path ./palm_c/palm_wikitext_checkpoints/checkpoint_best.pt
+```
+- Generate with top_p, top_k
+```bash
+python -m utils.interactive_v2 ./corpus/wikitext_bin_c \ 
+                                --task auto_encoding_regressive \
+                                --user-dir ./src \
+                                --source-lang source --target-lang target --bpe gpt2 \
+                                --beam 1 --nbest 1 --sampling --sampling-topk 50 --sampling-topp 0.9 --temperature 0.8 \
+                                --path ./palm_c/palm_wikitext_checkpoints/checkpoint_best.pt
+```

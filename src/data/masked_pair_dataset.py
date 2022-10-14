@@ -15,6 +15,7 @@ def collate(
     samples,
     pad_idx,
     eos_idx,
+    masked_src,
     left_pad_source=True,
     left_pad_target=False,
     input_feeding=True,
@@ -109,27 +110,30 @@ def collate(
             )
     else:
         ntokens = src_lengths.sum().item()
-
-    masked_source = merge(
-        "masked_source",
-        left_pad=left_pad_target,
-        pad_to_length=pad_to_length["masked_source"]
-        if pad_to_length is not None
-        else None,
-    )
-    masked_source = masked_source.index_select(0, sort_order)
-
+    if masked_src is not None: 
+        masked_source = merge(
+                "masked_source",
+                left_pad=left_pad_target,
+                pad_to_length=pad_to_length["masked_source"]
+                if pad_to_length is not None
+                else None,
+        )
+        masked_source = masked_source.index_select(0, sort_order)
+    else: 
+        masked_source = None
     batch = {
         "id": id,
         "nsentences": len(samples),
         "ntokens": ntokens,
         "net_input": {
-            "src_tokens": src_tokens,
-            "src_lengths": src_lengths,
+        "src_tokens": src_tokens,
+        "src_lengths": src_lengths,
         },
         "target": target,
         "masked_source": masked_source,
     }
+    
+
 
     # print("======================== BATCH ==============================")
     # print("id: ", id)
@@ -336,9 +340,15 @@ class LanguagePairDataset(FairseqDataset):
         return self.buckets
 
     def __getitem__(self, index):
+        #print("=======================================================")
+        #print("we are training and self,masked_src[idx]: ", self.masked_src[index])
+        #print("=======================================================")
         tgt_item = self.tgt[index] if self.tgt is not None else None
         src_item = self.src[index]
-        masked_src_item = self.masked_src[index]
+        if self.masked_src is not None:
+            masked_src_item = self.masked_src[index]
+        else:
+            masked_src_item = None
         # Append EOS to end of tgt sentence if it does not have an EOS and remove
         # EOS from end of src sentence if it exists. This is useful when we use
         # use existing datasets for opposite directions i.e., when we want to
@@ -364,13 +374,19 @@ class LanguagePairDataset(FairseqDataset):
             eos = self.src_dict.eos()
             if self.src[index][-1] == eos:
                 src_item = self.src[index][:-1]
-
-        example = {
-            "id": index,
-            "source": src_item,
-            "target": tgt_item,
-            "masked_source": masked_src_item,
-        }
+        if self.masked_src is not None: 
+            example = {
+                "id": index,
+                "source": src_item,
+                "target": tgt_item,
+                "masked_source": masked_src_item,
+            }
+        else:
+            example = {
+                "id": index,
+                "source": src_item,
+                "target": tgt_item,
+            }
 
         # print("\n===================================")
         # print("example: ", example)
@@ -424,6 +440,7 @@ class LanguagePairDataset(FairseqDataset):
             samples,
             pad_idx=self.src_dict.pad(),
             eos_idx=self.eos,
+            masked_src=self.masked_src,
             left_pad_source=self.left_pad_source,
             left_pad_target=self.left_pad_target,
             input_feeding=self.input_feeding,

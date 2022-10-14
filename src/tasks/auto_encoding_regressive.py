@@ -72,6 +72,9 @@ def load_langpair_dataset(
 
     for k in itertools.count():
         split_k = split + (str(k) if k > 0 else "")
+        ###############debug###################
+        #print("split_k: ", split_k) #valid
+        ###############debug###################
 
         # infer langcode
         if split_exists(split_k, src, tgt, src, data_path):
@@ -87,10 +90,16 @@ def load_langpair_dataset(
                 raise FileNotFoundError(
                     "Dataset not found: {} ({})".format(split, data_path)
                 )
-
+        #################debug################
+        #print("prefix + src: ", prefix+src) #./corpus/wikitext_bin_c/valid.source-target.source
+        ######################################
         src_dataset = data_utils.load_indexed_dataset(
             prefix + src, src_dict, dataset_impl
         )
+        #################debug###############
+        #print("src_dataset: ", src_dataset) #<fairseq.data.indexed_dataset.MMapIndexedDataset object at 0x7f9453722140>
+        #print("tgt_dataset is similar but tgt instead src")
+        #####################################
         if truncate_source:
             src_dataset = AppendTokenDataset(
                 TruncateDataset(
@@ -117,7 +126,7 @@ def load_langpair_dataset(
             break
     # logger.info('Length of Source DataSets: {}'.format(len(src_datasets)))
     assert len(src_datasets) == len(tgt_datasets) or len(tgt_datasets) == 0
-    print("len src_datasets: ", len(src_datasets))
+    print("len src_datasets: ", len(src_datasets)) # 1 
     if len(src_datasets) == 1:
         src_dataset = src_datasets[0]
         tgt_dataset = tgt_datasets[0] if len(tgt_datasets) > 0 else None
@@ -129,7 +138,11 @@ def load_langpair_dataset(
             tgt_dataset = ConcatDataset(tgt_datasets, sample_ratios)
         else:
             tgt_dataset = None
-
+    ###############debug################
+    #print("prepend_boss: ", prepend_bos) #false
+    #print("append_source_id: ", append_source_id) #false
+    #print("load_alignments: ", load_alignments) #false
+    ####################################
     if prepend_bos:
         assert hasattr(src_dict, "bos_index") and hasattr(
             tgt_dict, "bos_index")
@@ -168,7 +181,10 @@ def load_langpair_dataset(
 
     #
     
-    # mask source dataset.
+    # mask source dataset
+    ################debug################
+    #print("before mask source dataset src_dataset",src_dataset[0].size(), type(src_dataset),  src_dataset, src_dataset[0])# next(iter(src_dataset))) #<class 'fairseq.data.indexed_dataset.MMapIndexedDataset'> <fairseq.data.indexed_dataset.MMapIndexedDataset object at 0x7f9453722140>
+    #####################################.
     src_dataset, masked_src_dataset = MaskTokensDataset.apply_mask(
         src_dataset,
         src_dict,
@@ -183,6 +199,11 @@ def load_langpair_dataset(
         mask_multiple_length=mask_multiple_length,
         mask_stdev=mask_stdev,
     )
+    ################debug###################
+    #print("after masking: ")
+    #print("src_dataset: ",  src_dataset[0].size(), type(src_dataset), src_dataset, src_dataset[0])#next(iter(src_dataset))) # <class 'fairseq.data.lru_cache_dataset.LRUCacheDataset'> <fairseq.data.lru_cache_dataset.LRUCacheDataset object at 0x7f9453ad6200>
+    #print("masked_src_dataset: ", masked_src_dataset[0].size(), masked_src_dataset, masked_src_dataset[0])#next(iter(masked_src_dataset))) #<fairseq.data.lru_cache_dataset.LRUCacheDataset object at 0x7f9453ad6110>
+    ########################################
    
     # Print samples.
     # if split == 'valid':
@@ -406,18 +427,28 @@ class AutoEncodeingRegressiveTask(LegacyFairseqTask):
         Args:
             split (str): name of the split (e.g., train, valid, test)
         """
-
+        ############debug##############
+        #print("split: ", split)
+        ############debug##############
         paths = utils.split_paths(self.args.data)
- 
+        ############debug##############
+        #print("paths: ", paths)
+        ############debug##############
         assert len(paths) > 0
         if split != getattr(self.args, "train_subset", None):
             # if not training data set, use the first shard for valid and test
             paths = paths[:1]
         data_path = paths[(epoch - 1) % len(paths)]
-       
+        ############debug##############
+        #print("data_path: ", data_path)
+        ############debug##############
         # infer langcode
         src, tgt = self.args.source_lang, self.args.target_lang
-
+        ############debug##############
+        #print("src: ", src, type(src))
+        #print("tgt: ", tgt, type(tgt))
+        ############debug##############
+        #print("self.args.dataset_impl: ", self.args.dataset_impl)
         self.datasets[split] = load_langpair_dataset(
             data_path,
             split,
